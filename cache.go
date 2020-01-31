@@ -135,6 +135,20 @@ func (c *cache) Get(k string) (interface{}, bool) {
 	return item.Object, true
 }
 
+// Touch an item from the cache. Returns the item or nil, and a bool indicating
+// whether the key was found.
+func (c *cache) Touch(k string) (interface{}, bool) {
+	c.mu.Lock()
+	v, found := c.get(k)
+	if !found {
+		c.mu.Unlock()
+		return nil, false
+	}
+	c.set(k, v, DefaultExpiration)
+	c.mu.Unlock()
+	return v, true
+}
+
 // GetWithExpiration returns an item and its expiration time from the cache.
 // It returns the item or nil, the expiration time if one is set (if the item
 // never expires a zero value for time.Time is returned), and a bool indicating
